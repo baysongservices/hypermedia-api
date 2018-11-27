@@ -73,7 +73,7 @@ Link: rel="self blog#post/addComment blog#post/reportPost blog#post/approvePost"
 }
 ```
 
-```
+
 Start from arbitrary:
 ```
 GET http://exampleblog.org/posts/15
