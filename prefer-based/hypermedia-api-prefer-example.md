@@ -71,6 +71,8 @@ Start from arbitrary entry point:
 ```
 GET http://exampleblog.org/posts/15
 ```
+
+```
 200 OK
 Content-Type: application/json
 Preference-Applied: vocabulary=<http://example.org/vocab/blog1#post>
