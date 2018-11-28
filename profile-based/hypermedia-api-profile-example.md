@@ -60,7 +60,7 @@ Preference-Applied: hypermedia-api
 Preference-Applied: curie
 Preference-Applied: profile
 Link: rel="self blog#post/addComment blog#post/reportPost blog#post/approvePost",
-      rel="http://example.org/blog/goals/approveAndPublish"; type="application/goal+json",
+      <http://example.org/blog/goals/approveAndPublish>; rel="goal"; type="application/goal+json"
       </users/2>; rel="author",
       </users/14>; rel="blog#lastEditedBy",
       </comments/333>; rel="blog#comment",
