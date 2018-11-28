@@ -77,7 +77,13 @@ Link: rel="self blog#post/addComment blog#post/reportPost blog#post/approvePost"
   "postApproval": false
 }
 ```
+Now that we have accessed a resource with a representation, we start to see some additional metadata from the server as links without URIs. These links refer to the `self` context, meaning they are links to the same resource they are attached to in this example, and what they do is express the current affordances available to the resource.
 
+Lets look at the `rel="http://example.org/blog/goals/approveAndPublish"; type="application/goal+json"` link a little deeper. This link suggests there is a Goal of type `application/goal+json` defined at the extension relation type resolvable URI value of `http://example.org/blog/goals/approveAndPublish` related 
+
+In contrast to many alternative approaches to hypermedia where the hypermedia is embedded as part of a unique media type, hypermedia-api utilizes existing robust web standards to apply this metadata _without_ requireing specialized content types for processing, or inadvertantly breaking the underlying protocol uniform interface. As you can see from the interactions thus far, the server has yet to reply to any of these requests with a body.
+
+This has large impact on the utility of this methodology in a number of ways. This enhances cache reliability using the native cache management capabilities of HTTP by adding another means of comparison across media types to augment eviction of stale entries. As this is implemented using metadata only, it also means this methodology is truely backwards compatible. This system can be implemented on existing services in a way which _completely_ supports both hypermedia-api clients and the existing client base, and can be gradually phased in.
 
 
 Start from arbitrary entry point:
