@@ -17,7 +17,7 @@ Complete Example
     "state":"OPTIONS",
     "place":"PUT",
     "idempotentReplace":"PUT",
-    "unsafeModify":"PATCH
+    "unsafeModify":"PATCH",
     "remove":"DELETE",
     "tell":"POST",
     "ask":"POST"
