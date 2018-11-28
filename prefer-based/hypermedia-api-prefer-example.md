@@ -65,7 +65,7 @@ Preference-Applied: protocol-binding=<http://example.org/bindings/http/http-stan
 Preference-Applied: hypermedia-api
 Preference-Applied: curie=blog
 Link: rel="self blog#post/addComment blog#post/reportPost blog#post/approvePost",
-      rel="http://example.org/blog/goals/approveAndPublish"; type="application/goal+json",
+      <http://example.org/blog/goals/approveAndPublish>; rel="goal"; type="application/goal+json",
       </users/2>; rel="author",
       </users/14>; rel="blog#lastEditedBy",
       </comments/333>; rel="blog#comment",
@@ -79,25 +79,22 @@ Link: rel="self blog#post/addComment blog#post/reportPost blog#post/approvePost"
 ```
 Now that we have accessed a resource with a representation, we start to see some additional metadata from the server as links without URIs. These links refer to the `self` context, meaning they are links to the same resource they are attached to in this example, and what they do is express the current affordances available to the resource.
 
-Lets look at the `rel="http://example.org/blog/goals/approveAndPublish"; type="application/goal+json"` link a little deeper. This link suggests there is a Goal of type `application/goal+json` defined at the extension relation type resolvable URI value of `http://example.org/blog/goals/approveAndPublish` related 
+Lets look at the `<http://example.org/blog/goals/approveAndPublish>; rel="goal"; type="application/goal+json"` link a little deeper. The link relation type of `goal` defines the target of this link as a document which defines a multi-interaction stateless goal of type `application/goal+json`. If a link with this relation type is available on a resource, it means the current context is able to start the multi-step interaction with an available affordance listed as a start state in the goal document. This is another simple discovery step which will direct the interaction of the user with the service.
 
-In contrast to many alternative approaches to hypermedia where the hypermedia is embedded as part of a unique media type, hypermedia-api utilizes existing robust web standards to apply this metadata _without_ requireing specialized content types for processing, or inadvertantly breaking the underlying protocol uniform interface. As you can see from the interactions thus far, the server has yet to reply to any of these requests with a body.
+One final note for this responce, in contrast to the many alternative approaches to hypermedia where the controls are embedded in a unique media type, hypermedia-api utilizes existing robust web standards to apply this metadata _without_ requireing specialized content types for processing. This also prevents some subtle and inadvertant violations of the underlying protocol uniform interface. As you can see from the interactions thus far, the server had yet to reply to any of these requests with a body, and yet the interaction was completely discoverable, negotiated, and dynamically driven.
 
 This has large impact on the utility of this methodology in a number of ways. This enhances cache reliability using the native cache management capabilities of HTTP by adding another means of comparison across media types to augment eviction of stale entries. As this is implemented using metadata only, it also means this methodology is truely backwards compatible. This system can be implemented on existing services in a way which _completely_ supports both hypermedia-api clients and the existing client base, and can be gradually phased in.
 
-
-Start from arbitrary entry point:
 ```
 GET http://exampleblog.org/posts/15
 ```
-
+As this style services will exist on the internet or other networks using bookmarkable URIs, it is important to demonstrate how the interaction is bootstrapped if a client directly links to a resource with a stored URI and no metadata on the initial request. Take note of the fact that this is the same resource and operation for the previous request.
 ```
 200 OK
 Content-Type: application/json
 Preference-Applied: vocabulary=<http://example.org/vocab/blog1#post>
 Preference-Applied: protocol-binding=<http://example.org/bindings/http-standard>
 Preference-Applied: hypermedia-api
-Preference-Applied: profile
 Preference-Applied: curie=blog
 Link: <blog>; rel="vocabulary"; type="application/hyper-vocabulary+json",
       <http://example.org/blog/vocab/blog1.1>; rel="vocabulary"; type="application/hyper-vocabulary+json",
@@ -116,9 +113,11 @@ Link: <blog>; rel="vocabulary"; type="application/hyper-vocabulary+json",
   "postApproval": false
 }
 ```
+Clearly we can see some more extensive hypermedia being returned by the server. We notice the server has decided to apply the first version of the blog vocabulary `http://example.org/vocab/blog1` with the `blog` curie, and returned both of those values in the Preference-Applied header value. As the service did not receive a preference value for `hypermedia-api`, the server offers both sets of supported vocabularies and protocol-bindings to facilitate single interaction preference negotiation boot strapping.
 
+The server has elected to apply certain preferences, and provide the metadata for the hypermedia-api client to immediately begin interacting with the service after just a single interaction. With this additional data we'll assume the client makes the same choices, so the rest of the flow would apply to both scenarios identically.
 
-Here we encounter the follow your nose dilema. If it doesn't have the bound vocabulary you have no idea there is a publishPost affordance, how do you publish then.. try everything? The goal will curate your interaction.
+However, here we encounter one of the primary follow your nose dilemmas. If the vocabulary is not bound, or you don't have a goal like `#approveAndPublish` how would you know there is a publishPost affordance which may be available when the resource is in a certain state? In this case how would you publish with a follow your nose style client, try everything? This is both highly inefficient and can be downright dangerous on services where some affordances may have drastic side effects. Instead the goal and bounded vocabulary are used to curate the client interaction.
 
 ```
 GET http://example.org/blog/goals/approveAndPublish
