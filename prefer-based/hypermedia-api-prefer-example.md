@@ -123,15 +123,15 @@ However, here we encounter one of the primary follow your nose dilemmas. If the 
 GET http://example.org/blog/goals/approveAndPublish
 Prefer: return=minimal
 ```
-
+The `application/goal+json` mediaType supports a minimal return representation consisting of an ordered array of affordances to apply when initiating goal processing.
 ```
 200 OK
 Content-Type: application/json
 {
-  "start":"#post/approvePost"
+  "start":["#post/approvePost"]
 }
 ```
-
+The specification requires the server to return the goal when the appropriate affordances exist in the current resource state. Servers may also choose to return goals at other times for discovery or other purposes. Therefor it is possible the ordered array doesn't contain any affordance name values, and it is not possible to initiate the goal processing.
 ```
 POST /posts/15
 Content-Type: application/json
@@ -139,21 +139,22 @@ Prefer: vocabulary=<http://example.org/blog/vocab/blog1.1#post/approvePost>
 Prefer: protocol-binding=<http://example.org/bindings/http/http-standard>
 Prefer: hypermedia-api
 Prefer: curie=blog
-Prefer: goal=http://example.org/blog/goals/approveAndPublish
+Prefer: goal=<http://example.org/blog/goals/approveAndPublish>
 {
   "message":"This is approved for publishing."
 }
 ```
+In this request interaction we see the client performing a POST operation with a message structure it discovered in the vocabulary. This request is still providing the vocabulary field which is used by the server to interpret this POST request as a `#post/approvePost` message.
 
+Additionally, the client expresses it's preference to complete the `http://example.org/blog/goals/approveAndPublish` goal through the preference header goal value to prevent it from coupling itself to the internal implementation flow logic of the server.
 ```
 200 OK
 Content-Type: application/json
 Preference-Applied: vocabulary=<http://example.org/vocab/blog1#post>
 Preference-Applied: protocol-binding=<http://example.org/bindings/http-standard>
 Preference-Applied: hypermedia-api
-Preference-Applied: profile
 Preference-Applied: curie=blog
-Preference-Applied: goal=http://example.org/blog/goals/approveAndPublish
+Preference-Applied: goal=<http://example.org/blog/goals/approveAndPublish>
 Link: rel="next blog#post/publish"
 {
   "postContents":"The best post ever!",
@@ -161,7 +162,9 @@ Link: rel="next blog#post/publish"
   "postApproval": true
 }
 ```
+In this response we are able to highlight the effect the goal header has on the response metadata from the server. The only affordances the server returns in this case are the ones necessary to complete the goal. Additionally all of the composite relationship links have been removed in order to minimize the requirements of these focused interactions.
 
+This example only has a single affordance, but if multiple transitions are available and the goal is defined to allow it the server can also use the `next` relation type to suggest the next step.
 ```
 POST /posts/15
 Content-Type: application/json
@@ -169,14 +172,14 @@ Prefer: vocabulary=<http://example.org/blog/vocab/blog1.1#post/publishPost>
 Prefer: protocol-binding=<http://example.org/bindings/http/http-standard>
 Prefer: hypermedia-api
 Prefer: curie=blog
-Prefer: goal=http://example.org/blog/goals/approveAndPublish
+Prefer: goal=<http://example.org/blog/goals/approveAndPublish>
 {
   "message":"Check out this long share message, and our post here!",
   "shortMessage":"Check out our post!",
   "imageUrl="..."
 }
 ```
-
+As directed, the client proceeds to send the next message within the goal.
 ```
 200 OK
 Content-Type: application/json
@@ -184,6 +187,7 @@ Preference-Applied: vocabulary=<http://example.org/blog/vocab/blog1.1#post>
 Preference-Applied: protocol-binding=<http://example.org/bindings/http/http-standard>
 Preference-Applied: hypermedia-api
 Preference-Applied: curie=blog
+Preference-Applied: goal
 Link: rel="self blog#post/addComment blog#post/reportPost",
       </users/2>; rel="author",
       </users/14>; rel="blog#lastEditedBy",
@@ -196,3 +200,8 @@ Link: rel="self blog#post/addComment blog#post/reportPost",
   "postApproval": true
 }
 ```
+As the `http://example.org/blog/goals/approveAndPublish` is complete, you'll notice the server has not returned the Preference-Applied header value to signify the processing is complete. The full picture is determined by understanding the HTTP status code as well, which in this case as a `200 OK` indicates the goal processing reached an end state successfully.
+
+As there is no longer an active goal limiting the metadata, the server has resumed sending the available affordances and related composite resources.
+
+Finally while these interactions have updated the canonical representation of the resource, the client was able to use the service by binding and interacting only with the vocabulary and protocol binding. At no point in this interaction did the client ever hardcode a value, or parse a URI in order to learn something about the resource or service, or execute the next step.
