@@ -1,3 +1,4 @@
+```
 version
 includes - Name collisions will be referred to as curie:name within the resolves field. Best practice would be to explicitly resolve any conflicts in resolves, but by default definitions are first come first served. The resolved object can perform two actions, it can alias a new name from a curied collision, or it will assign the correct reference for the disputed name within this document. As this requires resolution of collisions it is REQUIRED this field resolves all included documents before processing the name resolutions. 
     link[]
@@ -82,3 +83,4 @@ messages - the name and attributes of a resource is considered a message, you ca
                 curie
             value
             format
+```
